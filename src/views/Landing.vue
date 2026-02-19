@@ -59,32 +59,6 @@
         </div>
       </div>
 
-      <!-- Available Services to add -->
-      <div class="available-extras" v-if="availableExtras.length > 0">
-        <h2 class="section-title">Servicios Adicionales</h2>
-        <div class="extras-list-simple">
-          <label
-            v-for="extra in availableExtras"
-            :key="extra.id"
-            class="extra-list-item"
-          >
-            <div class="list-item-left">
-              <input
-                type="checkbox"
-                :checked="selectedExtrasIds.includes(extra.id)"
-                @change="toggleExtra(extra.id)"
-                class="extra-checkbox"
-              />
-              <div class="list-item-content">
-                <span class="list-item-name">{{ extra.name }}</span>
-                <p class="list-item-description">{{ extra.description }}</p>
-              </div>
-            </div>
-            <span class="list-item-price">+{{ formatPrice(extra.price_cop, extra.price_usd, selectedCurrency) }}</span>
-          </label>
-        </div>
-      </div>
-
       <div class="proposal-section" v-if="plan">
         <div class="plan-header">
           <div class="plan-badge-container">
@@ -94,25 +68,6 @@
             <span class="price-label">Inversión Total</span>
             <div class="price">
               <span class="amount">{{ formatTotalPrice }}</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Features: Qué incluye tu proyecto -->
-        <div class="features-section">
-          <h2 class="features-title">✓ Qué incluye tu proyecto</h2>
-          <div class="features-grid">
-            <div
-              v-for="(feature, index) in plan?.features"
-              :key="index"
-              class="feature-card"
-            >
-              <div class="feature-icon">
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                  <path d="M16.6667 5L7.50004 14.1667L3.33337 10" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </div>
-              <span class="feature-text">{{ feature }}</span>
             </div>
           </div>
         </div>
@@ -152,28 +107,6 @@
           </div>
         </div>
 
-        <div class="cta-section">
-          <button @click="acceptProposal" class="btn-accept">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path d="M20 6L9 17L4 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-            Aceptar Presupuesto
-          </button>
-          <p class="cta-note">
-            Al aceptar, nos pondremos en contacto contigo en las próximas 24 horas
-          </p>
-        </div>
-
-        <div v-if="accepted" class="success-message">
-          <div class="success-icon">
-            <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-              <circle cx="16" cy="16" r="14" fill="#10B981" opacity="0.1"/>
-              <path d="M21.3333 12L14 19.3333L10.6667 16" stroke="#10B981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </div>
-          <h3>¡Propuesta Aceptada!</h3>
-          <p>Nos pondremos en contacto contigo pronto. Gracias por confiar en nosotros.</p>
-        </div>
       </div>
 
       <footer class="footer">
@@ -214,7 +147,6 @@ import { useData } from '../composables/useData';
 import { getCurrencySettings, formatPrice, getPrice } from '../lib/currency';
 
 const route = useRoute();
-const accepted = ref(false);
 const selectedExtrasIds = ref<string[]>([]);
 const selectedPlanId = ref<string>('');
 
@@ -260,13 +192,6 @@ const toggleExtra = (extraId: string) => {
   } else {
     selectedExtrasIds.value.push(extraId);
   }
-};
-
-const acceptProposal = () => {
-  accepted.value = true;
-  setTimeout(() => {
-    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-  }, 100);
 };
 
 onMounted(async () => {
@@ -525,132 +450,6 @@ onMounted(async () => {
   color: #7C2D12;
 }
 
-/* Available Extras List */
-.available-extras {
-  background: white;
-  border-radius: 24px;
-  padding: 40px;
-  margin-bottom: 32px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
-}
-
-.extras-list-simple {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.extra-list-item {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 14px 16px;
-  background: #F9FAFB;
-  border-radius: 10px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  gap: 16px;
-}
-
-.extra-list-item:hover {
-  background: #F5F3FF;
-}
-
-.list-item-left {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  flex: 1;
-}
-
-.extra-checkbox {
-  width: 18px;
-  height: 18px;
-  margin-top: 3px;
-  cursor: pointer;
-  accent-color: #5D3FD3;
-  flex-shrink: 0;
-}
-
-.list-item-content {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.list-item-name {
-  font-size: 14px;
-  font-weight: 700;
-  color: #111827;
-}
-
-.list-item-description {
-  font-size: 12px;
-  color: #6B7280;
-  margin: 0;
-  line-height: 1.3;
-}
-
-.list-item-price {
-  font-size: 13px;
-  font-weight: 700;
-  color: #5D3FD3;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.features-section {
-  margin-bottom: 48px;
-}
-
-.features-title {
-  font-size: 22px;
-  font-weight: 700;
-  color: #111827;
-  margin: 0 0 24px 0;
-}
-
-.features-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-  gap: 16px;
-}
-
-.feature-card {
-  display: flex;
-  align-items: flex-start;
-  gap: 16px;
-  padding: 20px;
-  background: #F9FAFB;
-  border-radius: 14px;
-  transition: all 0.2s ease;
-}
-
-.feature-card:hover {
-  background: #F5F3FF;
-  transform: translateX(4px);
-}
-
-.feature-icon {
-  flex-shrink: 0;
-  width: 40px;
-  height: 40px;
-  background: linear-gradient(135deg, #5D3FD3 0%, #7C3AED 100%);
-  color: white;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.feature-text {
-  font-size: 15px;
-  color: #374151;
-  font-weight: 500;
-  line-height: 1.5;
-  padding-top: 6px;
-}
-
 /* Available Extras Section */
 .available-extras {
   background: white;
@@ -782,83 +581,6 @@ onMounted(async () => {
   font-weight: 700;
   color: #5D3FD3;
   line-height: 1;
-}
-
-.cta-section {
-  text-align: center;
-  padding-top: 32px;
-  border-top: 2px solid #F3F4F6;
-}
-
-.btn-accept {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  padding: 20px 48px;
-  background: linear-gradient(135deg, #5D3FD3 0%, #7C3AED 100%);
-  color: white;
-  border: none;
-  border-radius: 16px;
-  font-size: 18px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 8px 24px rgba(93, 63, 211, 0.3);
-}
-
-.btn-accept:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 32px rgba(93, 63, 211, 0.4);
-}
-
-.btn-accept:active {
-  transform: translateY(0);
-}
-
-.cta-note {
-  margin-top: 16px;
-  font-size: 14px;
-  color: #6B7280;
-}
-
-.success-message {
-  margin-top: 32px;
-  padding: 32px;
-  background: linear-gradient(135deg, #F0FDF4 0%, #ECFDF5 100%);
-  border-radius: 16px;
-  text-align: center;
-  animation: slideIn 0.5s ease;
-}
-
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.success-icon {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 16px;
-}
-
-.success-message h3 {
-  font-size: 24px;
-  font-weight: 700;
-  color: #065F46;
-  margin: 0 0 8px 0;
-}
-
-.success-message p {
-  font-size: 16px;
-  color: #047857;
-  margin: 0;
 }
 
 .footer {
@@ -1104,10 +826,6 @@ onMounted(async () => {
     font-size: 40px;
   }
 
-  .features-grid {
-    grid-template-columns: 1fr;
-  }
-
   .extra-check-item {
     flex-wrap: wrap;
   }
@@ -1119,12 +837,6 @@ onMounted(async () => {
   .check-description {
     width: 100%;
     margin-top: 8px;
-  }
-
-  .btn-accept {
-    width: 100%;
-    padding: 16px 24px;
-    font-size: 16px;
   }
 
   .plans-selector {
