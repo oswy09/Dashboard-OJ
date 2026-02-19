@@ -273,12 +273,8 @@ watch(categoryCopyTemplates, (templates) => {
 
 const generateProposal = () => {
   const baseUrl = window.location.origin;
-  const params = new URLSearchParams({
-    cliente: clientName.value,
-    categoryId: selectedCategoryId.value,
-    planId: selectedPlanId.value
-  });
-  generatedLink.value = `${baseUrl}/propuesta?${params.toString()}`;
+  const proposalId = btoa(`${clientName.value}|${selectedCategoryId.value}|${selectedPlanId.value}`).replace(/=/g, '');
+  generatedLink.value = `${baseUrl}/propuesta?id=${proposalId}`;
   copied.value = false;
 };
 

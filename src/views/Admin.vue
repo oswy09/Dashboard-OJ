@@ -131,6 +131,30 @@
         </div>
       </div>
 
+      <div v-show="activeTab === 'booking'" class="tab-content">
+        <div class="section-header">
+          <h2>Gestión de Modos de Reserva</h2>
+          <button @click="openBookingModal()" class="btn-add">+ Nuevo Modo de Reserva</button>
+        </div>
+
+        <div class="items-grid">
+          <div v-for="booking in bookingModes" :key="booking.id" class="item-card">
+            <div class="item-info">
+              <h4>{{ booking.name }}</h4>
+              <p class="item-description">{{ booking.description }}</p>
+              <div class="price-group">
+                <p class="plan-price">${{ booking.price_cop.toLocaleString() }} COP</p>
+                <p class="plan-price-alt">{{ getPriceDisplay(booking.price_cop, booking.price_usd) }}</p>
+              </div>
+            </div>
+            <div class="item-actions">
+              <button @click="openBookingModal(booking)" class="btn-edit">Editar</button>
+              <button @click="confirmDeleteBooking(booking.id)" class="btn-delete">Eliminar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div v-show="activeTab === 'cotizacion'" class="tab-content">
         <div class="section-header">
           <h2>📊 Cotización del Dólar (USD/COP)</h2>
@@ -257,6 +281,14 @@
             <input v-model="planForm.slug" type="text" required />
           </div>
           <div class="form-group">
+            <label>Descripción</label>
+            <textarea v-model="planForm.description" rows="3" placeholder="Descripción del plan"></textarea>
+          </div>
+          <div class="form-group">
+            <label>Resultado</label>
+            <textarea v-model="planForm.result" rows="3" placeholder="¿Qué resultado obtendrá el cliente?"></textarea>
+          </div>
+          <div class="form-group">
             <label>Precio en COP (Pesos Colombianos)</label>
             <input v-model.number="planForm.price_cop" type="number" required />
           </div>
@@ -351,6 +383,38 @@
         </form>
       </div>
     </div>
+
+    <div v-if="showBookingModal" class="modal-overlay" @click="showBookingModal = false">
+      <div class="modal" @click.stop>
+        <h3>{{ editingBooking ? 'Editar' : 'Nuevo' }} Modo de Reserva</h3>
+        <form @submit.prevent="saveBooking">
+          <div class="form-group">
+            <label>Nombre del Modo de Reserva</label>
+            <input v-model="bookingForm.name" type="text" placeholder="Ej: Calendario Online, WhatsApp, Email" required />
+          </div>
+          <div class="form-group">
+            <label>Descripción</label>
+            <textarea v-model="bookingForm.description" rows="4" placeholder="Describe el modo de reserva"></textarea>
+          </div>
+          <div class="form-group">
+            <label>Precio en COP (Pesos Colombianos)</label>
+            <input v-model.number="bookingForm.price_cop" type="number" required />
+          </div>
+          <div class="form-group">
+            <label>Precio en USD (Dólares)</label>
+            <input v-model.number="bookingForm.price_usd" type="number" required />
+          </div>
+          <div class="form-group">
+            <label>Orden</label>
+            <input v-model.number="bookingForm.order_index" type="number" required />
+          </div>
+          <div class="modal-actions">
+            <button type="button" @click="showBookingModal = false" class="btn-cancel">Cancelar</button>
+            <button type="submit" class="btn-save">Guardar</button>
+          </div>
+        </form>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -365,6 +429,7 @@ const {
   plans,
   copyTemplates,
   extras,
+  bookingModes,
   loading,
   usingLocalStorage,
   loadAll,
@@ -379,7 +444,10 @@ const {
   deleteCopyTemplate,
   addExtra,
   updateExtra,
-  deleteExtra
+  deleteExtra,
+  addBookingMode,
+  updateBookingMode,
+  deleteBookingMode
 } = useData();
 
 const activeTab = ref('categories');
@@ -388,7 +456,8 @@ const tabs = [
   { id: 'categories', name: 'Categorías' },
   { id: 'plans', name: 'Planes' },
   { id: 'copys', name: 'Plantillas de Texto' },
-  { id: 'extras', name: 'Servicios Adicionales' }
+  { id: 'extras', name: 'Servicios Adicionales' },
+  { id: 'booking', name: 'Modos de Reserva' }
 ];
 
 const showCategoryModal = ref(false);
@@ -411,6 +480,8 @@ const planForm = ref({
   category_id: '',
   name: '',
   slug: '',
+  description: '',
+  result: '',
   price_cop: 0,
   price_usd: 0,
   currency: 'COP',
@@ -437,6 +508,17 @@ const extraForm = ref({
   price_cop: 0,
   price_usd: 0,
   currency: 'COP',
+  order_index: 0
+});
+
+const showBookingModal = ref(false);
+const editingBooking = ref<any | null>(null);
+
+const bookingForm = ref({
+  name: '',
+  description: '',
+  price_cop: 0,
+  price_usd: 0,
   order_index: 0
 });
 
@@ -577,6 +659,8 @@ const openPlanModal = (plan?: Plan) => {
       category_id: plan.category_id,
       name: plan.name,
       slug: plan.slug,
+      description: plan.description || '',
+      result: plan.result || '',
       price_cop: plan.price_cop,
       price_usd: plan.price_usd,
       currency: plan.currency,
@@ -590,6 +674,8 @@ const openPlanModal = (plan?: Plan) => {
       category_id: '',
       name: '',
       slug: '',
+      description: '',
+      result: '',
       price_cop: 0,
       price_usd: 0,
       currency: 'COP',
@@ -710,6 +796,48 @@ const saveExtra = async () => {
 const confirmDeleteExtra = async (id: string) => {
   if (confirm('¿Estás seguro de eliminar este servicio adicional?')) {
     await deleteExtra(id);
+  }
+};
+
+const openBookingModal = (booking?: any) => {
+  if (booking) {
+    editingBooking.value = booking;
+    bookingForm.value = {
+      name: booking.name,
+      description: booking.description,
+      price_cop: booking.price_cop,
+      price_usd: booking.price_usd,
+      order_index: booking.order_index
+    };
+  } else {
+    editingBooking.value = null;
+    bookingForm.value = {
+      name: '',
+      description: '',
+      price_cop: 0,
+      price_usd: 0,
+      order_index: 0
+    };
+  }
+  showBookingModal.value = true;
+};
+
+const saveBooking = async () => {
+  try {
+    if (editingBooking.value) {
+      await updateBookingMode(editingBooking.value.id, bookingForm.value);
+    } else {
+      await addBookingMode(bookingForm.value);
+    }
+    showBookingModal.value = false;
+  } catch (e) {
+    alert('Error al guardar el modo de reserva');
+  }
+};
+
+const confirmDeleteBooking = async (id: string) => {
+  if (confirm('¿Estás seguro de eliminar este modo de reserva?')) {
+    await deleteBookingMode(id);
   }
 };
 </script>

@@ -158,8 +158,29 @@ const selectedCurrency = computed(() => {
   return currencySettings.currency;
 });
 
-const clientName = computed(() => route.query.cliente as string || 'Tu Negocio');
-const categoryId = computed(() => route.query.categoryId as string);
+// Decode proposal ID from URL
+const decodeProposalId = () => {
+  const id = route.query.id as string;
+  if (id) {
+    try {
+      const decoded = atob(id);
+      const [client, cat, plan] = decoded.split('|');
+      return { clientName: client, categoryId: cat, planId: plan };
+    } catch (e) {
+      console.error('Error decoding proposal ID:', e);
+    }
+  }
+  // Fallback to old format
+  return {
+    clientName: route.query.cliente as string || 'Tu Negocio',
+    categoryId: route.query.categoryId as string,
+    planId: route.query.planId as string
+  };
+};
+
+const proposalData = decodeProposalId();
+const clientName = computed(() => proposalData.clientName || 'Tu Negocio');
+const categoryId = computed(() => proposalData.categoryId);
 
 const nicho = computed(() => categories.value.find(c => c.id === categoryId.value));
 const availablePlans = computed(() => plans.value.filter(p => p.category_id === categoryId.value));
@@ -196,13 +217,13 @@ const toggleExtra = (extraId: string) => {
 
 onMounted(async () => {
   await loadAll();
-  // Set initial plan from query or first available
-  if (route.query.planId) {
-    selectedPlanId.value = route.query.planId as string;
+  // Set initial plan from decoded ID or query or first available
+  if (proposalData.planId) {
+    selectedPlanId.value = proposalData.planId;
   } else if (availablePlans.value.length > 0) {
     selectedPlanId.value = availablePlans.value[0].id;
   }
-  
+
   if (!nicho.value || !plan.value) {
     console.error('Datos de propuesta no encontrados');
   }

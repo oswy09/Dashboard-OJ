@@ -3,10 +3,21 @@ import { supabase, isSupabaseAvailable, type Category, type Plan, type CopyTempl
 import { getDefaultCategories, getDefaultPlans, getDefaultCopyTemplates, getDefaultExtras } from '../data/mockData';
 import { localStorageDB } from '../lib/localStorage';
 
+export interface BookingMode {
+  id: string;
+  name: string;
+  description: string;
+  price_cop: number;
+  price_usd: number;
+  order_index: number;
+  created_at?: string;
+}
+
 const categories = ref<Category[]>([]);
 const plans = ref<Plan[]>([]);
 const copyTemplates = ref<CopyTemplate[]>([]);
 const extras = ref<Extra[]>([]);
+const bookingModes = ref<BookingMode[]>([]);
 const loading = ref(false);
 const error = ref<string | null>(null);
 const usingLocalStorage = ref(!isSupabaseAvailable);
@@ -135,12 +146,39 @@ export function useData() {
     }
   };
 
+  const loadBookingModes = async () => {
+    loading.value = true;
+    error.value = null;
+    try {
+      if (isSupabaseAvailable && supabase) {
+        const { data, error: err } = await supabase
+          .from('booking_modes')
+          .select('*')
+          .order('order_index');
+
+        if (err) throw err;
+        bookingModes.value = data || [];
+        usingLocalStorage.value = false;
+      } else {
+        bookingModes.value = localStorageDB.getBookingModes() || [];
+        usingLocalStorage.value = true;
+      }
+    } catch (e) {
+      console.error('Error loading booking modes from Supabase:', e);
+      bookingModes.value = localStorageDB.getBookingModes() || [];
+      usingLocalStorage.value = true;
+    } finally {
+      loading.value = false;
+    }
+  };
+
   const loadAll = async () => {
     await Promise.all([
       loadCategories(),
       loadPlans(),
       loadCopyTemplates(),
-      loadExtras()
+      loadExtras(),
+      loadBookingModes()
     ]);
   };
 
@@ -592,6 +630,113 @@ export function useData() {
     }
   };
 
+  const addBookingMode = async (booking: Omit<BookingMode, 'id' | 'created_at'>) => {
+    loading.value = true;
+    error.value = null;
+    try {
+      if (isSupabaseAvailable && supabase) {
+        const { data, error: err } = await supabase
+          .from('booking_modes')
+          .insert([booking])
+          .select()
+          .single();
+
+        if (err) throw err;
+        if (data) {
+          bookingModes.value.push(data);
+        }
+        return data;
+      } else {
+        const newBooking: BookingMode = {
+          ...booking,
+          id: localStorageDB.generateId(),
+          created_at: new Date().toISOString()
+        };
+        const allBookings = localStorageDB.getBookingModes() || [];
+        allBookings.push(newBooking);
+        localStorageDB.setBookingModes(allBookings);
+        bookingModes.value = allBookings;
+        return newBooking;
+      }
+    } catch (e) {
+      error.value = e instanceof Error ? e.message : 'Error adding booking mode';
+      console.error('Error adding booking mode:', e);
+      throw e;
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  const updateBookingMode = async (id: string, updates: Partial<BookingMode>) => {
+    loading.value = true;
+    error.value = null;
+    try {
+      if (isSupabaseAvailable && supabase) {
+        const { data, error: err } = await supabase
+          .from('booking_modes')
+          .update(updates)
+          .eq('id', id)
+          .select()
+          .single();
+
+        if (err) throw err;
+        if (data) {
+          const index = bookingModes.value.findIndex(b => b.id === id);
+          if (index !== -1) {
+            bookingModes.value[index] = data;
+          }
+        }
+        return data;
+      } else {
+        const allBookings = localStorageDB.getBookingModes() || [];
+        const index = allBookings.findIndex(b => b.id === id);
+        if (index !== -1) {
+          allBookings[index] = {
+            ...allBookings[index],
+            ...updates
+          };
+          localStorageDB.setBookingModes(allBookings);
+          bookingModes.value = allBookings;
+          return allBookings[index];
+        }
+        return null;
+      }
+    } catch (e) {
+      error.value = e instanceof Error ? e.message : 'Error updating booking mode';
+      console.error('Error updating booking mode:', e);
+      throw e;
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  const deleteBookingMode = async (id: string) => {
+    loading.value = true;
+    error.value = null;
+    try {
+      if (isSupabaseAvailable && supabase) {
+        const { error: err } = await supabase
+          .from('booking_modes')
+          .delete()
+          .eq('id', id);
+
+        if (err) throw err;
+        bookingModes.value = bookingModes.value.filter(b => b.id !== id);
+      } else {
+        const allBookings = localStorageDB.getBookingModes() || [];
+        const filtered = allBookings.filter(b => b.id !== id);
+        localStorageDB.setBookingModes(filtered);
+        bookingModes.value = filtered;
+      }
+    } catch (e) {
+      error.value = e instanceof Error ? e.message : 'Error deleting booking mode';
+      console.error('Error deleting booking mode:', e);
+      throw e;
+    } finally {
+      loading.value = false;
+    }
+  };
+
   const processTemplate = (template: string, replacements: Record<string, string>): string => {
     let processed = template;
     Object.entries(replacements).forEach(([key, value]) => {
@@ -606,6 +751,7 @@ export function useData() {
     plans: computed(() => plans.value),
     copyTemplates: computed(() => copyTemplates.value),
     extras: computed(() => extras.value),
+    bookingModes: computed(() => bookingModes.value),
     loading: computed(() => loading.value),
     error: computed(() => error.value),
     usingLocalStorage: computed(() => usingLocalStorage.value),
@@ -613,6 +759,7 @@ export function useData() {
     loadPlans,
     loadCopyTemplates,
     loadExtras,
+    loadBookingModes,
     loadAll,
     getPlansByCategory,
     getCopyTemplatesByCategory,
@@ -628,6 +775,9 @@ export function useData() {
     addExtra,
     updateExtra,
     deleteExtra,
+    addBookingMode,
+    updateBookingMode,
+    deleteBookingMode,
     processTemplate
   };
 }
