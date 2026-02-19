@@ -60,17 +60,6 @@
       </div>
 
       <div class="proposal-section" v-if="plan">
-        <div class="plan-header">
-          <div class="plan-badge-container">
-            <span class="plan-badge">📦 Plan {{ plan?.name }}</span>
-          </div>
-          <div class="price-container">
-            <span class="price-label">Inversión Total</span>
-            <div class="price">
-              <span class="amount">{{ formatTotalPrice }}</span>
-            </div>
-          </div>
-        </div>
 
         <!-- Available Services to add -->
         <div class="available-extras" v-if="availableExtras.length > 0">
@@ -553,57 +542,6 @@ onMounted(async () => {
   margin-bottom: 32px;
 }
 
-.plan-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-bottom: 32px;
-  margin-bottom: 40px;
-  border-bottom: 2px solid #F3F4F6;
-}
-
-.plan-badge-container {
-  flex: 1;
-}
-
-.plan-badge {
-  display: inline-block;
-  padding: 12px 24px;
-  background: linear-gradient(135deg, #5D3FD3 0%, #7C3AED 100%);
-  color: white;
-  border-radius: 12px;
-  font-size: 16px;
-  font-weight: 700;
-}
-
-.price-container {
-  text-align: right;
-}
-
-.price-label {
-  display: block;
-  font-size: 14px;
-  color: #6B7280;
-  font-weight: 600;
-  margin-bottom: 8px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.price {
-  display: flex;
-  align-items: baseline;
-  justify-content: flex-end;
-  gap: 6px;
-}
-
-.amount {
-  font-size: 48px;
-  font-weight: 700;
-  color: #5D3FD3;
-  line-height: 1;
-}
-
 .footer {
   background: linear-gradient(135deg, #1F2937 0%, #111827 100%);
   padding: 48px 24px;
@@ -835,16 +773,6 @@ onMounted(async () => {
 
   .proposal-section {
     padding: 24px 16px;
-  }
-
-  .plan-header {
-    flex-direction: column;
-    gap: 16px;
-    align-items: flex-start;
-  }
-
-  .amount {
-    font-size: 40px;
   }
 
   .extra-check-item {
