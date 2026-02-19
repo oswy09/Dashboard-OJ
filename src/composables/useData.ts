@@ -27,23 +27,22 @@ export function useData() {
     loading.value = true;
     error.value = null;
     try {
-      if (!isSupabaseAvailable || !supabase) {
+      if (isSupabaseAvailable && supabase) {
+        const { data, error: err } = await supabase
+          .from('categories')
+          .select('*')
+          .order('order_index');
+
+        if (err) throw err;
+        categories.value = data || [];
+        usingLocalStorage.value = false;
+      } else {
         initializeLocalStorage();
         categories.value = localStorageDB.getCategories();
         usingLocalStorage.value = true;
-        return;
       }
-
-      const { data, error: err } = await supabase
-        .from('categories')
-        .select('*')
-        .order('order_index');
-
-      if (err) throw err;
-      categories.value = data || [];
-      usingLocalStorage.value = false;
     } catch (e) {
-      console.error('Error loading categories:', e);
+      console.error('Error loading categories from Supabase:', e);
       initializeLocalStorage();
       categories.value = localStorageDB.getCategories();
       usingLocalStorage.value = true;
@@ -56,23 +55,22 @@ export function useData() {
     loading.value = true;
     error.value = null;
     try {
-      if (!isSupabaseAvailable || !supabase) {
+      if (isSupabaseAvailable && supabase) {
+        const { data, error: err } = await supabase
+          .from('plans')
+          .select('*')
+          .order('order_index');
+
+        if (err) throw err;
+        plans.value = data || [];
+        usingLocalStorage.value = false;
+      } else {
         initializeLocalStorage();
         plans.value = localStorageDB.getPlans();
         usingLocalStorage.value = true;
-        return;
       }
-
-      const { data, error: err } = await supabase
-        .from('plans')
-        .select('*')
-        .order('order_index');
-
-      if (err) throw err;
-      plans.value = data || [];
-      usingLocalStorage.value = false;
     } catch (e) {
-      console.error('Error loading plans:', e);
+      console.error('Error loading plans from Supabase:', e);
       initializeLocalStorage();
       plans.value = localStorageDB.getPlans();
       usingLocalStorage.value = true;
@@ -85,23 +83,22 @@ export function useData() {
     loading.value = true;
     error.value = null;
     try {
-      if (!isSupabaseAvailable || !supabase) {
+      if (isSupabaseAvailable && supabase) {
+        const { data, error: err } = await supabase
+          .from('copy_templates')
+          .select('*')
+          .order('order_index');
+
+        if (err) throw err;
+        copyTemplates.value = data || [];
+        usingLocalStorage.value = false;
+      } else {
         initializeLocalStorage();
         copyTemplates.value = localStorageDB.getCopyTemplates();
         usingLocalStorage.value = true;
-        return;
       }
-
-      const { data, error: err } = await supabase
-        .from('copy_templates')
-        .select('*')
-        .order('order_index');
-
-      if (err) throw err;
-      copyTemplates.value = data || [];
-      usingLocalStorage.value = false;
     } catch (e) {
-      console.error('Error loading copy templates:', e);
+      console.error('Error loading copy templates from Supabase:', e);
       initializeLocalStorage();
       copyTemplates.value = localStorageDB.getCopyTemplates();
       usingLocalStorage.value = true;
@@ -114,23 +111,22 @@ export function useData() {
     loading.value = true;
     error.value = null;
     try {
-      if (!isSupabaseAvailable || !supabase) {
+      if (isSupabaseAvailable && supabase) {
+        const { data, error: err } = await supabase
+          .from('extras')
+          .select('*')
+          .order('order_index');
+
+        if (err) throw err;
+        extras.value = data || [];
+        usingLocalStorage.value = false;
+      } else {
         initializeLocalStorage();
         extras.value = localStorageDB.getExtras();
         usingLocalStorage.value = true;
-        return;
       }
-
-      const { data, error: err } = await supabase
-        .from('extras')
-        .select('*')
-        .order('order_index');
-
-      if (err) throw err;
-      extras.value = data || [];
-      usingLocalStorage.value = false;
     } catch (e) {
-      console.error('Error loading extras:', e);
+      console.error('Error loading extras from Supabase:', e);
       initializeLocalStorage();
       extras.value = localStorageDB.getExtras();
       usingLocalStorage.value = true;
@@ -164,7 +160,19 @@ export function useData() {
     loading.value = true;
     error.value = null;
     try {
-      if (!isSupabaseAvailable || !supabase) {
+      if (isSupabaseAvailable && supabase) {
+        const { data, error: err } = await supabase
+          .from('categories')
+          .insert([category])
+          .select()
+          .single();
+
+        if (err) throw err;
+        if (data) {
+          categories.value.push(data);
+        }
+        return data;
+      } else {
         const newCategory: Category = {
           ...category,
           id: localStorageDB.generateId(),
@@ -177,18 +185,6 @@ export function useData() {
         categories.value = allCategories;
         return newCategory;
       }
-
-      const { data, error: err } = await supabase
-        .from('categories')
-        .insert([category])
-        .select()
-        .single();
-
-      if (err) throw err;
-      if (data) {
-        categories.value.push(data);
-      }
-      return data;
     } catch (e) {
       error.value = e instanceof Error ? e.message : 'Error adding category';
       console.error('Error adding category:', e);
@@ -202,7 +198,23 @@ export function useData() {
     loading.value = true;
     error.value = null;
     try {
-      if (!isSupabaseAvailable || !supabase) {
+      if (isSupabaseAvailable && supabase) {
+        const { data, error: err } = await supabase
+          .from('categories')
+          .update({ ...updates, updated_at: new Date().toISOString() })
+          .eq('id', id)
+          .select()
+          .single();
+
+        if (err) throw err;
+        if (data) {
+          const index = categories.value.findIndex(c => c.id === id);
+          if (index !== -1) {
+            categories.value[index] = data;
+          }
+        }
+        return data;
+      } else {
         const allCategories = localStorageDB.getCategories();
         const index = allCategories.findIndex(c => c.id === id);
         if (index !== -1) {
@@ -217,22 +229,6 @@ export function useData() {
         }
         throw new Error('Category not found');
       }
-
-      const { data, error: err } = await supabase
-        .from('categories')
-        .update({ ...updates, updated_at: new Date().toISOString() })
-        .eq('id', id)
-        .select()
-        .single();
-
-      if (err) throw err;
-      if (data) {
-        const index = categories.value.findIndex(c => c.id === id);
-        if (index !== -1) {
-          categories.value[index] = data;
-        }
-      }
-      return data;
     } catch (e) {
       error.value = e instanceof Error ? e.message : 'Error updating category';
       console.error('Error updating category:', e);
@@ -246,21 +242,20 @@ export function useData() {
     loading.value = true;
     error.value = null;
     try {
-      if (!isSupabaseAvailable || !supabase) {
+      if (isSupabaseAvailable && supabase) {
+        const { error: err } = await supabase
+          .from('categories')
+          .delete()
+          .eq('id', id);
+
+        if (err) throw err;
+        categories.value = categories.value.filter(c => c.id !== id);
+      } else {
         const allCategories = localStorageDB.getCategories();
         const filtered = allCategories.filter(c => c.id !== id);
         localStorageDB.setCategories(filtered);
         categories.value = filtered;
-        return;
       }
-
-      const { error: err } = await supabase
-        .from('categories')
-        .delete()
-        .eq('id', id);
-
-      if (err) throw err;
-      categories.value = categories.value.filter(c => c.id !== id);
     } catch (e) {
       error.value = e instanceof Error ? e.message : 'Error deleting category';
       console.error('Error deleting category:', e);
@@ -274,7 +269,19 @@ export function useData() {
     loading.value = true;
     error.value = null;
     try {
-      if (!isSupabaseAvailable || !supabase) {
+      if (isSupabaseAvailable && supabase) {
+        const { data, error: err } = await supabase
+          .from('plans')
+          .insert([plan])
+          .select()
+          .single();
+
+        if (err) throw err;
+        if (data) {
+          plans.value.push(data);
+        }
+        return data;
+      } else {
         const newPlan: Plan = {
           ...plan,
           id: localStorageDB.generateId(),
@@ -287,18 +294,6 @@ export function useData() {
         plans.value = allPlans;
         return newPlan;
       }
-
-      const { data, error: err } = await supabase
-        .from('plans')
-        .insert([plan])
-        .select()
-        .single();
-
-      if (err) throw err;
-      if (data) {
-        plans.value.push(data);
-      }
-      return data;
     } catch (e) {
       error.value = e instanceof Error ? e.message : 'Error adding plan';
       console.error('Error adding plan:', e);
@@ -312,7 +307,23 @@ export function useData() {
     loading.value = true;
     error.value = null;
     try {
-      if (!isSupabaseAvailable || !supabase) {
+      if (isSupabaseAvailable && supabase) {
+        const { data, error: err } = await supabase
+          .from('plans')
+          .update({ ...updates, updated_at: new Date().toISOString() })
+          .eq('id', id)
+          .select()
+          .single();
+
+        if (err) throw err;
+        if (data) {
+          const index = plans.value.findIndex(p => p.id === id);
+          if (index !== -1) {
+            plans.value[index] = data;
+          }
+        }
+        return data;
+      } else {
         const allPlans = localStorageDB.getPlans();
         const index = allPlans.findIndex(p => p.id === id);
         if (index !== -1) {
@@ -327,22 +338,6 @@ export function useData() {
         }
         throw new Error('Plan not found');
       }
-
-      const { data, error: err } = await supabase
-        .from('plans')
-        .update({ ...updates, updated_at: new Date().toISOString() })
-        .eq('id', id)
-        .select()
-        .single();
-
-      if (err) throw err;
-      if (data) {
-        const index = plans.value.findIndex(p => p.id === id);
-        if (index !== -1) {
-          plans.value[index] = data;
-        }
-      }
-      return data;
     } catch (e) {
       error.value = e instanceof Error ? e.message : 'Error updating plan';
       console.error('Error updating plan:', e);
@@ -356,21 +351,20 @@ export function useData() {
     loading.value = true;
     error.value = null;
     try {
-      if (!isSupabaseAvailable || !supabase) {
+      if (isSupabaseAvailable && supabase) {
+        const { error: err } = await supabase
+          .from('plans')
+          .delete()
+          .eq('id', id);
+
+        if (err) throw err;
+        plans.value = plans.value.filter(p => p.id !== id);
+      } else {
         const allPlans = localStorageDB.getPlans();
         const filtered = allPlans.filter(p => p.id !== id);
         localStorageDB.setPlans(filtered);
         plans.value = filtered;
-        return;
       }
-
-      const { error: err } = await supabase
-        .from('plans')
-        .delete()
-        .eq('id', id);
-
-      if (err) throw err;
-      plans.value = plans.value.filter(p => p.id !== id);
     } catch (e) {
       error.value = e instanceof Error ? e.message : 'Error deleting plan';
       console.error('Error deleting plan:', e);
@@ -384,7 +378,19 @@ export function useData() {
     loading.value = true;
     error.value = null;
     try {
-      if (!isSupabaseAvailable || !supabase) {
+      if (isSupabaseAvailable && supabase) {
+        const { data, error: err } = await supabase
+          .from('copy_templates')
+          .insert([template])
+          .select()
+          .single();
+
+        if (err) throw err;
+        if (data) {
+          copyTemplates.value.push(data);
+        }
+        return data;
+      } else {
         const newTemplate: CopyTemplate = {
           ...template,
           id: localStorageDB.generateId(),
@@ -397,18 +403,6 @@ export function useData() {
         copyTemplates.value = allTemplates;
         return newTemplate;
       }
-
-      const { data, error: err } = await supabase
-        .from('copy_templates')
-        .insert([template])
-        .select()
-        .single();
-
-      if (err) throw err;
-      if (data) {
-        copyTemplates.value.push(data);
-      }
-      return data;
     } catch (e) {
       error.value = e instanceof Error ? e.message : 'Error adding copy template';
       console.error('Error adding copy template:', e);
@@ -422,7 +416,23 @@ export function useData() {
     loading.value = true;
     error.value = null;
     try {
-      if (!isSupabaseAvailable || !supabase) {
+      if (isSupabaseAvailable && supabase) {
+        const { data, error: err } = await supabase
+          .from('copy_templates')
+          .update({ ...updates, updated_at: new Date().toISOString() })
+          .eq('id', id)
+          .select()
+          .single();
+
+        if (err) throw err;
+        if (data) {
+          const index = copyTemplates.value.findIndex(c => c.id === id);
+          if (index !== -1) {
+            copyTemplates.value[index] = data;
+          }
+        }
+        return data;
+      } else {
         const allTemplates = localStorageDB.getCopyTemplates();
         const index = allTemplates.findIndex(c => c.id === id);
         if (index !== -1) {
@@ -437,22 +447,6 @@ export function useData() {
         }
         throw new Error('Template not found');
       }
-
-      const { data, error: err } = await supabase
-        .from('copy_templates')
-        .update({ ...updates, updated_at: new Date().toISOString() })
-        .eq('id', id)
-        .select()
-        .single();
-
-      if (err) throw err;
-      if (data) {
-        const index = copyTemplates.value.findIndex(c => c.id === id);
-        if (index !== -1) {
-          copyTemplates.value[index] = data;
-        }
-      }
-      return data;
     } catch (e) {
       error.value = e instanceof Error ? e.message : 'Error updating copy template';
       console.error('Error updating copy template:', e);
@@ -466,21 +460,20 @@ export function useData() {
     loading.value = true;
     error.value = null;
     try {
-      if (!isSupabaseAvailable || !supabase) {
+      if (isSupabaseAvailable && supabase) {
+        const { error: err } = await supabase
+          .from('copy_templates')
+          .delete()
+          .eq('id', id);
+
+        if (err) throw err;
+        copyTemplates.value = copyTemplates.value.filter(c => c.id !== id);
+      } else {
         const allTemplates = localStorageDB.getCopyTemplates();
         const filtered = allTemplates.filter(c => c.id !== id);
         localStorageDB.setCopyTemplates(filtered);
         copyTemplates.value = filtered;
-        return;
       }
-
-      const { error: err } = await supabase
-        .from('copy_templates')
-        .delete()
-        .eq('id', id);
-
-      if (err) throw err;
-      copyTemplates.value = copyTemplates.value.filter(c => c.id !== id);
     } catch (e) {
       error.value = e instanceof Error ? e.message : 'Error deleting copy template';
       console.error('Error deleting copy template:', e);
@@ -494,7 +487,19 @@ export function useData() {
     loading.value = true;
     error.value = null;
     try {
-      if (!isSupabaseAvailable || !supabase) {
+      if (isSupabaseAvailable && supabase) {
+        const { data, error: err } = await supabase
+          .from('extras')
+          .insert([extra])
+          .select()
+          .single();
+
+        if (err) throw err;
+        if (data) {
+          extras.value.push(data);
+        }
+        return data;
+      } else {
         const newExtra: Extra = {
           ...extra,
           id: localStorageDB.generateId(),
@@ -507,18 +512,6 @@ export function useData() {
         extras.value = allExtras;
         return newExtra;
       }
-
-      const { data, error: err } = await supabase
-        .from('extras')
-        .insert([extra])
-        .select()
-        .single();
-
-      if (err) throw err;
-      if (data) {
-        extras.value.push(data);
-      }
-      return data;
     } catch (e) {
       error.value = e instanceof Error ? e.message : 'Error adding extra';
       console.error('Error adding extra:', e);
@@ -532,7 +525,23 @@ export function useData() {
     loading.value = true;
     error.value = null;
     try {
-      if (!isSupabaseAvailable || !supabase) {
+      if (isSupabaseAvailable && supabase) {
+        const { data, error: err } = await supabase
+          .from('extras')
+          .update({ ...updates, updated_at: new Date().toISOString() })
+          .eq('id', id)
+          .select()
+          .single();
+
+        if (err) throw err;
+        if (data) {
+          const index = extras.value.findIndex(e => e.id === id);
+          if (index !== -1) {
+            extras.value[index] = data;
+          }
+        }
+        return data;
+      } else {
         const allExtras = localStorageDB.getExtras();
         const index = allExtras.findIndex(e => e.id === id);
         if (index !== -1) {
@@ -547,22 +556,6 @@ export function useData() {
         }
         throw new Error('Extra not found');
       }
-
-      const { data, error: err } = await supabase
-        .from('extras')
-        .update({ ...updates, updated_at: new Date().toISOString() })
-        .eq('id', id)
-        .select()
-        .single();
-
-      if (err) throw err;
-      if (data) {
-        const index = extras.value.findIndex(e => e.id === id);
-        if (index !== -1) {
-          extras.value[index] = data;
-        }
-      }
-      return data;
     } catch (e) {
       error.value = e instanceof Error ? e.message : 'Error updating extra';
       console.error('Error updating extra:', e);
@@ -576,21 +569,20 @@ export function useData() {
     loading.value = true;
     error.value = null;
     try {
-      if (!isSupabaseAvailable || !supabase) {
+      if (isSupabaseAvailable && supabase) {
+        const { error: err } = await supabase
+          .from('extras')
+          .delete()
+          .eq('id', id);
+
+        if (err) throw err;
+        extras.value = extras.value.filter(e => e.id !== id);
+      } else {
         const allExtras = localStorageDB.getExtras();
         const filtered = allExtras.filter(e => e.id !== id);
         localStorageDB.setExtras(filtered);
         extras.value = filtered;
-        return;
       }
-
-      const { error: err } = await supabase
-        .from('extras')
-        .delete()
-        .eq('id', id);
-
-      if (err) throw err;
-      extras.value = extras.value.filter(e => e.id !== id);
     } catch (e) {
       error.value = e instanceof Error ? e.message : 'Error deleting extra';
       console.error('Error deleting extra:', e);
