@@ -1,0 +1,257 @@
+{
+  "categories": [
+    {
+      "id": "hotel",
+      "name": "Hoteles",
+      "slug": "hoteles",
+      "icon": "🏨",
+      "description": "Soluciones digitales para aumentar reservas directas y mejorar la experiencia del huésped",
+      "order_index": 0
+    },
+    {
+      "id": "spa",
+      "name": "Spas",
+      "slug": "spas",
+      "icon": "💆",
+      "description": "Gestión de citas y marketing digital para centros de bienestar y spa",
+      "order_index": 1
+    },
+    {
+      "id": "gastro",
+      "name": "Gastronomía",
+      "slug": "gastronomia",
+      "icon": "🍽️",
+      "description": "Presencia online y delivery optimizado para restaurantes y negocios gastronómicos",
+      "order_index": 2
+    }
+  ],
+  "plans": [
+    {
+      "id": "hotel-basico",
+      "category_id": "hotel",
+      "name": "Landing Page Básica",
+      "slug": "landing-basica",
+      "price": 800,
+      "features": [
+        "Diseño responsive optimizado",
+        "Sección de habitaciones y servicios",
+        "Formulario de contacto",
+        "Integración Google Maps",
+        "Galería de fotos profesional",
+        "SEO básico incluido"
+      ],
+      "order_index": 0
+    },
+    {
+      "id": "hotel-intermedio",
+      "category_id": "hotel",
+      "name": "Web con Motor de Reservas",
+      "slug": "web-reservas",
+      "price": 2500,
+      "features": [
+        "Todo lo del plan básico",
+        "Sistema de reservas online",
+        "Calendario de disponibilidad",
+        "Pasarela de pago integrada",
+        "Panel de administración",
+        "Email automáticos de confirmación",
+        "2 meses de soporte técnico"
+      ],
+      "order_index": 1
+    },
+    {
+      "id": "hotel-premium",
+      "category_id": "hotel",
+      "name": "Suite Digital Completa",
+      "slug": "suite-completa",
+      "price": 5000,
+      "features": [
+        "Todo lo del plan intermedio",
+        "App móvil nativa (iOS + Android)",
+        "Sistema de puntos de lealtad",
+        "Chatbot con IA",
+        "Integración con redes sociales",
+        "Dashboard de analytics avanzado",
+        "Marketing automation",
+        "6 meses de soporte premium"
+      ],
+      "order_index": 2
+    },
+    {
+      "id": "spa-basico",
+      "category_id": "spa",
+      "name": "Presencia Web Profesional",
+      "slug": "web-profesional",
+      "price": 700,
+      "features": [
+        "Diseño elegante y minimalista",
+        "Catálogo de servicios",
+        "Galería de instalaciones",
+        "Formulario de consulta",
+        "Integración WhatsApp",
+        "Optimización móvil"
+      ],
+      "order_index": 0
+    },
+    {
+      "id": "spa-intermedio",
+      "category_id": "spa",
+      "name": "Sistema de Reservas Online",
+      "slug": "reservas-online",
+      "price": 2000,
+      "features": [
+        "Todo lo del plan básico",
+        "Agenda digital inteligente",
+        "Reservas 24/7 automatizadas",
+        "Recordatorios por SMS/Email",
+        "Gestión de terapeutas",
+        "Paquetes y promociones",
+        "Panel administrativo"
+      ],
+      "order_index": 1
+    },
+    {
+      "id": "spa-premium",
+      "category_id": "spa",
+      "name": "Ecosistema Digital Premium",
+      "slug": "ecosistema-premium",
+      "price": 4200,
+      "features": [
+        "Todo lo del plan intermedio",
+        "CRM integrado para clientes",
+        "Programa de membresías",
+        "Email marketing automatizado",
+        "Sistema de reseñas",
+        "Integración redes sociales",
+        "Analytics y reportes",
+        "Soporte prioritario 6 meses"
+      ],
+      "order_index": 2
+    },
+    {
+      "id": "gastro-basico",
+      "category_id": "gastro",
+      "name": "Carta Digital Interactiva",
+      "slug": "carta-digital",
+      "price": 600,
+      "features": [
+        "Menú digital responsive",
+        "Fotos profesionales de platos",
+        "Actualización fácil de precios",
+        "Códigos QR para mesas",
+        "Sección de ubicación",
+        "Enlaces a redes sociales"
+      ],
+      "order_index": 0
+    },
+    {
+      "id": "gastro-intermedio",
+      "category_id": "gastro",
+      "name": "Sistema de Pedidos Online",
+      "slug": "pedidos-online",
+      "price": 1800,
+      "features": [
+        "Todo lo del plan básico",
+        "Carrito de compras inteligente",
+        "Pedidos para delivery y takeaway",
+        "Integración con WhatsApp",
+        "Gestión de zonas de entrega",
+        "Panel de administración",
+        "Reportes de ventas"
+      ],
+      "order_index": 1
+    },
+    {
+      "id": "gastro-premium",
+      "category_id": "gastro",
+      "name": "Plataforma Gastronómica 360",
+      "slug": "plataforma-360",
+      "price": 3800,
+      "features": [
+        "Todo lo del plan intermedio",
+        "App móvil personalizada",
+        "Sistema de reservas de mesas",
+        "Programa de fidelización",
+        "Marketing por email/SMS",
+        "Integración POS",
+        "Dashboard analítico completo",
+        "Soporte premium 6 meses"
+      ],
+      "order_index": 2
+    }
+  ],
+  "copyTemplates": [
+    {
+      "id": "hotel-frio",
+      "category_id": "hotel",
+      "stage": "contacto",
+      "stage_name": "Contacto Frío",
+      "template_text": "Hola {{cliente}}, soy [Tu Nombre] y trabajo con hoteles en {{nicho}}.\n\nVi que [tu hotel] tiene presencia online, pero noté que podrías estar perdiendo reservas directas por no tener un sistema de reservas optimizado.\n\nCreamos una propuesta específica para {{cliente}} que podría aumentar tus reservas directas hasta un 40%. ¿Te gustaría verla?\n\nAquí está: {{link_propuesta}}\n\nSi te interesa, podemos agendar una llamada de 15 minutos para explicarte todo.",
+      "order_index": 0
+    },
+    {
+      "id": "hotel-demo",
+      "category_id": "hotel",
+      "stage": "demo",
+      "stage_name": "Envío Demo",
+      "template_text": "Hola {{cliente}}, como prometido te envío la propuesta digital personalizada para {{cliente}}.\n\n👉 {{link_propuesta}}\n\nEn esta propuesta encontrarás:\n✅ 3 opciones de inversión adaptadas a tu hotel\n✅ Ejemplos visuales de cómo quedaría tu sistema\n✅ ROI estimado y tiempo de implementación\n✅ Casos de éxito de otros hoteles en {{nicho}}\n\nTómate tu tiempo para revisarla. ¿Cuándo podríamos tener una llamada para resolver dudas?",
+      "order_index": 1
+    },
+    {
+      "id": "hotel-cierre",
+      "category_id": "hotel",
+      "stage": "cierre",
+      "stage_name": "Cierre/Onboarding",
+      "template_text": "Perfecto {{cliente}}, me alegra que te haya gustado la propuesta 🎉\n\nPara comenzar con la implementación necesito:\n\n1️⃣ Confirmar el plan seleccionado\n2️⃣ Logo y fotos de alta calidad del hotel\n3️⃣ Acceso al dominio (si ya tienes uno)\n4️⃣ 50% de anticipo para iniciar\n\nEl tiempo de desarrollo es de 3-4 semanas y estarías online antes de la temporada alta.\n\n¿Arrancamos esta semana? Aquí está nuevamente tu propuesta: {{link_propuesta}}",
+      "order_index": 2
+    },
+    {
+      "id": "spa-frio",
+      "category_id": "spa",
+      "stage": "contacto",
+      "stage_name": "Contacto Frío",
+      "template_text": "Hola {{cliente}}, soy [Tu Nombre] y me especializo en transformar spas y centros wellness en {{nicho}}.\n\nEstuve revisando [tu spa] y veo una oportunidad clara: muchos clientes buscan spas en Google pero no pueden reservar online fácilmente.\n\nPreparé una propuesta digital específica para {{cliente}} que facilitaría las reservas 24/7 y aumentaría tu ocupación.\n\nMírala aquí: {{link_propuesta}}\n\n¿Te gustaría que conversemos 15 minutos sobre esto?",
+      "order_index": 0
+    },
+    {
+      "id": "spa-demo",
+      "category_id": "spa",
+      "stage": "demo",
+      "stage_name": "Envío Demo",
+      "template_text": "Hola {{cliente}}, aquí está la propuesta personalizada para {{cliente}} 💆‍♀️\n\n👉 {{link_propuesta}}\n\nDentro encontrarás:\n✅ 3 paquetes diseñados para spas en {{nicho}}\n✅ Sistema de reservas automatizado\n✅ Ejemplos visuales y demos interactivas\n✅ Inversión y retorno estimado\n✅ Testimonios de otros spas\n\nRevísala con calma y avísame cualquier duda. ¿Cuándo podríamos agendar una videollamada?",
+      "order_index": 1
+    },
+    {
+      "id": "spa-cierre",
+      "category_id": "spa",
+      "stage": "cierre",
+      "stage_name": "Cierre/Onboarding",
+      "template_text": "Excelente {{cliente}}, ¡vamos a digitalizarlo todo! 🚀\n\nPara empezar necesito de tu parte:\n\n1️⃣ Confirmación del plan elegido\n2️⃣ Logo, fotos del spa y lista de servicios\n3️⃣ Disponibilidad de terapeutas (para la agenda)\n4️⃣ 50% de seña para iniciar el proyecto\n\nEn 3 semanas tendrías tu sistema de reservas funcionando.\n\n¿Comenzamos? Revisa nuevamente la propuesta aquí: {{link_propuesta}}",
+      "order_index": 2
+    },
+    {
+      "id": "gastro-frio",
+      "category_id": "gastro",
+      "stage": "contacto",
+      "stage_name": "Contacto Frío",
+      "template_text": "Hola {{cliente}}, soy [Tu Nombre] y ayudo a restaurantes en {{nicho}} a vender más por delivery y takeaway.\n\nRevisé [tu restaurante] y noté que no tienen un sistema de pedidos online propio (estás pagando comisiones altas a las apps).\n\nCreamos una propuesta para {{cliente}} que incluye tu propia plataforma de pedidos sin comisiones.\n\nChécala acá: {{link_propuesta}}\n\n¿Te interesa ver cómo funciona? Podemos hacer una llamada rápida.",
+      "order_index": 0
+    },
+    {
+      "id": "gastro-demo",
+      "category_id": "gastro",
+      "stage": "demo",
+      "stage_name": "Envío Demo",
+      "template_text": "Hola {{cliente}}, como hablamos te comparto la propuesta digital para {{cliente}} 🍽️\n\n👉 {{link_propuesta}}\n\nEn esta propuesta verás:\n✅ 3 opciones de inversión para restaurantes\n✅ Tu propia app de pedidos (sin comisiones)\n✅ Menú digital interactivo\n✅ Cálculo de ahorro vs. apps de delivery\n✅ Casos de éxito en {{nicho}}\n\nRevísala y dime qué te parece. ¿Cuándo podemos hablar para resolver dudas?",
+      "order_index": 1
+    },
+    {
+      "id": "gastro-cierre",
+      "category_id": "gastro",
+      "stage": "cierre",
+      "stage_name": "Cierre/Onboarding",
+      "template_text": "Perfecto {{cliente}}, ¡vamos a lanzar tu sistema! 🎉\n\nPara arrancar necesito:\n\n1️⃣ Confirmación del paquete seleccionado\n2️⃣ Logo, fotos de platos y menú completo con precios\n3️⃣ Zonas de delivery y tiempos estimados\n4️⃣ 50% de anticipo para comenzar\n\nEn 2-3 semanas estarías recibiendo pedidos sin comisiones.\n\n¿Arrancamos esta semana? Tu propuesta está aquí: {{link_propuesta}}",
+      "order_index": 2
+    }
+  ]
+}
