@@ -35,7 +35,7 @@ export const saveCurrencySettings = (settings: CurrencySettings): void => {
   localStorage.setItem(CURRENCY_KEY, JSON.stringify(settings));
 };
 
-export const formatPrice = (priceCOP: number, priceUSD: number, currency: Currency): string => {
+export const formatPrice = (priceCOP: number, _priceUSD: number, currency: Currency): string => {
   let price: number;
   
   if (currency === 'COP') {
@@ -52,7 +52,7 @@ export const formatPrice = (priceCOP: number, priceUSD: number, currency: Curren
   return `${symbol}${price.toLocaleString('es-CO')}${suffix}`;
 };
 
-export const getPrice = (priceCOP: number, priceUSD: number, currency: Currency): number => {
+export const getPrice = (priceCOP: number, _priceUSD: number, currency: Currency): number => {
   if (currency === 'COP') {
     return priceCOP;
   } else {

@@ -85,7 +85,7 @@
         </div>
       </div>
 
-      <div class="proposal-section" v-if="currentPlan">
+      <div class="proposal-section" v-if="plan">
         <div class="plan-header">
           <div class="plan-badge-container">
             <span class="plan-badge">📦 Plan {{ plan?.name }}</span>
@@ -211,7 +211,7 @@
 import { ref, computed, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import { useData } from '../composables/useData';
-import { getCurrencySettings, formatPrice, getPrice, type Currency } from '../lib/currency';
+import { getCurrencySettings, formatPrice, getPrice } from '../lib/currency';
 
 const route = useRoute();
 const accepted = ref(false);
