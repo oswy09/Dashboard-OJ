@@ -25,7 +25,12 @@
       </div>
 
       <div v-if="loading" class="loading">Cargando...</div>
-      <div v-if="error" class="error">{{ error }}</div>
+      <div v-if="usingLocalStorage" class="local-storage-notice">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="margin-right: 8px;">
+          <path d="M8 1.33334V8.00001M8 8.00001V14.6667M8 8.00001H14.6667M8 8.00001H1.33334" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        Trabajando en modo local (los cambios se guardan en este navegador)
+      </div>
 
       <div v-show="activeTab === 'categories'" class="tab-content">
         <div class="section-header">
@@ -361,7 +366,7 @@ const {
   copyTemplates,
   extras,
   loading,
-  error,
+  usingLocalStorage,
   loadAll,
   addCategory,
   updateCategory,
@@ -1151,6 +1156,21 @@ const confirmDeleteExtra = async (id: string) => {
   color: #EF4444;
   background: #FEF2F2;
   border-radius: 10px;
+}
+
+.local-storage-notice {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
+  border: 1px solid #C7D2FE;
+  border-radius: 10px;
+  color: #4338CA;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.1);
 }
 
 /* Exchange Rate Styles */

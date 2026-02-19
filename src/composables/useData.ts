@@ -1,6 +1,7 @@
 import { ref, computed } from 'vue';
 import { supabase, isSupabaseAvailable, type Category, type Plan, type CopyTemplate, type Extra } from '../lib/supabase';
-import { mockCategories, mockPlans, mockCopyTemplates, mockExtras } from '../data/mockData';
+import { getDefaultCategories, getDefaultPlans, getDefaultCopyTemplates, getDefaultExtras } from '../data/mockData';
+import { localStorageDB } from '../lib/localStorage';
 
 const categories = ref<Category[]>([]);
 const plans = ref<Plan[]>([]);
@@ -8,12 +9,17 @@ const copyTemplates = ref<CopyTemplate[]>([]);
 const extras = ref<Extra[]>([]);
 const loading = ref(false);
 const error = ref<string | null>(null);
+const usingLocalStorage = ref(!isSupabaseAvailable);
 
-const ensureSupabase = () => {
-  if (!isSupabaseAvailable || !supabase) {
-    throw new Error('Supabase no está disponible en modo mock');
+const initializeLocalStorage = () => {
+  if (!localStorageDB.isInitialized()) {
+    console.log('Inicializando datos por defecto en localStorage');
+    localStorageDB.setCategories(getDefaultCategories());
+    localStorageDB.setPlans(getDefaultPlans());
+    localStorageDB.setCopyTemplates(getDefaultCopyTemplates());
+    localStorageDB.setExtras(getDefaultExtras());
+    localStorageDB.setInitialized();
   }
-  return supabase;
 };
 
 export function useData() {
@@ -22,8 +28,9 @@ export function useData() {
     error.value = null;
     try {
       if (!isSupabaseAvailable || !supabase) {
-        console.log('Usando datos mock para categorías');
-        categories.value = mockCategories;
+        initializeLocalStorage();
+        categories.value = localStorageDB.getCategories();
+        usingLocalStorage.value = true;
         return;
       }
 
@@ -34,11 +41,12 @@ export function useData() {
 
       if (err) throw err;
       categories.value = data || [];
+      usingLocalStorage.value = false;
     } catch (e) {
-      error.value = e instanceof Error ? e.message : 'Error loading categories';
       console.error('Error loading categories:', e);
-      console.log('Usando datos mock como fallback');
-      categories.value = mockCategories;
+      initializeLocalStorage();
+      categories.value = localStorageDB.getCategories();
+      usingLocalStorage.value = true;
     } finally {
       loading.value = false;
     }
@@ -49,8 +57,9 @@ export function useData() {
     error.value = null;
     try {
       if (!isSupabaseAvailable || !supabase) {
-        console.log('Usando datos mock para planes');
-        plans.value = mockPlans;
+        initializeLocalStorage();
+        plans.value = localStorageDB.getPlans();
+        usingLocalStorage.value = true;
         return;
       }
 
@@ -61,11 +70,12 @@ export function useData() {
 
       if (err) throw err;
       plans.value = data || [];
+      usingLocalStorage.value = false;
     } catch (e) {
-      error.value = e instanceof Error ? e.message : 'Error loading plans';
       console.error('Error loading plans:', e);
-      console.log('Usando datos mock como fallback');
-      plans.value = mockPlans;
+      initializeLocalStorage();
+      plans.value = localStorageDB.getPlans();
+      usingLocalStorage.value = true;
     } finally {
       loading.value = false;
     }
@@ -76,8 +86,9 @@ export function useData() {
     error.value = null;
     try {
       if (!isSupabaseAvailable || !supabase) {
-        console.log('Usando datos mock para templates');
-        copyTemplates.value = mockCopyTemplates;
+        initializeLocalStorage();
+        copyTemplates.value = localStorageDB.getCopyTemplates();
+        usingLocalStorage.value = true;
         return;
       }
 
@@ -88,11 +99,12 @@ export function useData() {
 
       if (err) throw err;
       copyTemplates.value = data || [];
+      usingLocalStorage.value = false;
     } catch (e) {
-      error.value = e instanceof Error ? e.message : 'Error loading copy templates';
       console.error('Error loading copy templates:', e);
-      console.log('Usando datos mock como fallback');
-      copyTemplates.value = mockCopyTemplates;
+      initializeLocalStorage();
+      copyTemplates.value = localStorageDB.getCopyTemplates();
+      usingLocalStorage.value = true;
     } finally {
       loading.value = false;
     }
@@ -103,8 +115,9 @@ export function useData() {
     error.value = null;
     try {
       if (!isSupabaseAvailable || !supabase) {
-        console.log('Usando datos mock para extras');
-        extras.value = mockExtras;
+        initializeLocalStorage();
+        extras.value = localStorageDB.getExtras();
+        usingLocalStorage.value = true;
         return;
       }
 
@@ -115,11 +128,12 @@ export function useData() {
 
       if (err) throw err;
       extras.value = data || [];
+      usingLocalStorage.value = false;
     } catch (e) {
-      error.value = e instanceof Error ? e.message : 'Error loading extras';
       console.error('Error loading extras:', e);
-      console.log('Usando datos mock como fallback');
-      extras.value = mockExtras;
+      initializeLocalStorage();
+      extras.value = localStorageDB.getExtras();
+      usingLocalStorage.value = true;
     } finally {
       loading.value = false;
     }
@@ -150,9 +164,21 @@ export function useData() {
     loading.value = true;
     error.value = null;
     try {
-      const sb = ensureSupabase();
+      if (!isSupabaseAvailable || !supabase) {
+        const newCategory: Category = {
+          ...category,
+          id: localStorageDB.generateId(),
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        const allCategories = localStorageDB.getCategories();
+        allCategories.push(newCategory);
+        localStorageDB.setCategories(allCategories);
+        categories.value = allCategories;
+        return newCategory;
+      }
 
-      const { data, error: err } = await sb
+      const { data, error: err } = await supabase
         .from('categories')
         .insert([category])
         .select()
@@ -176,9 +202,23 @@ export function useData() {
     loading.value = true;
     error.value = null;
     try {
-      const sb = ensureSupabase();
+      if (!isSupabaseAvailable || !supabase) {
+        const allCategories = localStorageDB.getCategories();
+        const index = allCategories.findIndex(c => c.id === id);
+        if (index !== -1) {
+          allCategories[index] = {
+            ...allCategories[index],
+            ...updates,
+            updated_at: new Date().toISOString()
+          };
+          localStorageDB.setCategories(allCategories);
+          categories.value = allCategories;
+          return allCategories[index];
+        }
+        throw new Error('Category not found');
+      }
 
-      const { data, error: err } = await sb
+      const { data, error: err } = await supabase
         .from('categories')
         .update({ ...updates, updated_at: new Date().toISOString() })
         .eq('id', id)
@@ -206,9 +246,15 @@ export function useData() {
     loading.value = true;
     error.value = null;
     try {
-      const sb = ensureSupabase();
+      if (!isSupabaseAvailable || !supabase) {
+        const allCategories = localStorageDB.getCategories();
+        const filtered = allCategories.filter(c => c.id !== id);
+        localStorageDB.setCategories(filtered);
+        categories.value = filtered;
+        return;
+      }
 
-      const { error: err } = await sb
+      const { error: err } = await supabase
         .from('categories')
         .delete()
         .eq('id', id);
@@ -228,9 +274,21 @@ export function useData() {
     loading.value = true;
     error.value = null;
     try {
-      const sb = ensureSupabase();
+      if (!isSupabaseAvailable || !supabase) {
+        const newPlan: Plan = {
+          ...plan,
+          id: localStorageDB.generateId(),
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        const allPlans = localStorageDB.getPlans();
+        allPlans.push(newPlan);
+        localStorageDB.setPlans(allPlans);
+        plans.value = allPlans;
+        return newPlan;
+      }
 
-      const { data, error: err } = await sb
+      const { data, error: err } = await supabase
         .from('plans')
         .insert([plan])
         .select()
@@ -254,9 +312,23 @@ export function useData() {
     loading.value = true;
     error.value = null;
     try {
-      const sb = ensureSupabase();
+      if (!isSupabaseAvailable || !supabase) {
+        const allPlans = localStorageDB.getPlans();
+        const index = allPlans.findIndex(p => p.id === id);
+        if (index !== -1) {
+          allPlans[index] = {
+            ...allPlans[index],
+            ...updates,
+            updated_at: new Date().toISOString()
+          };
+          localStorageDB.setPlans(allPlans);
+          plans.value = allPlans;
+          return allPlans[index];
+        }
+        throw new Error('Plan not found');
+      }
 
-      const { data, error: err } = await sb
+      const { data, error: err } = await supabase
         .from('plans')
         .update({ ...updates, updated_at: new Date().toISOString() })
         .eq('id', id)
@@ -284,9 +356,15 @@ export function useData() {
     loading.value = true;
     error.value = null;
     try {
-      const sb = ensureSupabase();
+      if (!isSupabaseAvailable || !supabase) {
+        const allPlans = localStorageDB.getPlans();
+        const filtered = allPlans.filter(p => p.id !== id);
+        localStorageDB.setPlans(filtered);
+        plans.value = filtered;
+        return;
+      }
 
-      const { error: err } = await sb
+      const { error: err } = await supabase
         .from('plans')
         .delete()
         .eq('id', id);
@@ -306,9 +384,21 @@ export function useData() {
     loading.value = true;
     error.value = null;
     try {
-      const sb = ensureSupabase();
+      if (!isSupabaseAvailable || !supabase) {
+        const newTemplate: CopyTemplate = {
+          ...template,
+          id: localStorageDB.generateId(),
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        const allTemplates = localStorageDB.getCopyTemplates();
+        allTemplates.push(newTemplate);
+        localStorageDB.setCopyTemplates(allTemplates);
+        copyTemplates.value = allTemplates;
+        return newTemplate;
+      }
 
-      const { data, error: err } = await sb
+      const { data, error: err } = await supabase
         .from('copy_templates')
         .insert([template])
         .select()
@@ -332,9 +422,23 @@ export function useData() {
     loading.value = true;
     error.value = null;
     try {
-      const sb = ensureSupabase();
+      if (!isSupabaseAvailable || !supabase) {
+        const allTemplates = localStorageDB.getCopyTemplates();
+        const index = allTemplates.findIndex(c => c.id === id);
+        if (index !== -1) {
+          allTemplates[index] = {
+            ...allTemplates[index],
+            ...updates,
+            updated_at: new Date().toISOString()
+          };
+          localStorageDB.setCopyTemplates(allTemplates);
+          copyTemplates.value = allTemplates;
+          return allTemplates[index];
+        }
+        throw new Error('Template not found');
+      }
 
-      const { data, error: err } = await sb
+      const { data, error: err } = await supabase
         .from('copy_templates')
         .update({ ...updates, updated_at: new Date().toISOString() })
         .eq('id', id)
@@ -362,9 +466,15 @@ export function useData() {
     loading.value = true;
     error.value = null;
     try {
-      const sb = ensureSupabase();
+      if (!isSupabaseAvailable || !supabase) {
+        const allTemplates = localStorageDB.getCopyTemplates();
+        const filtered = allTemplates.filter(c => c.id !== id);
+        localStorageDB.setCopyTemplates(filtered);
+        copyTemplates.value = filtered;
+        return;
+      }
 
-      const { error: err } = await sb
+      const { error: err } = await supabase
         .from('copy_templates')
         .delete()
         .eq('id', id);
@@ -384,9 +494,21 @@ export function useData() {
     loading.value = true;
     error.value = null;
     try {
-      const sb = ensureSupabase();
+      if (!isSupabaseAvailable || !supabase) {
+        const newExtra: Extra = {
+          ...extra,
+          id: localStorageDB.generateId(),
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        const allExtras = localStorageDB.getExtras();
+        allExtras.push(newExtra);
+        localStorageDB.setExtras(allExtras);
+        extras.value = allExtras;
+        return newExtra;
+      }
 
-      const { data, error: err } = await sb
+      const { data, error: err } = await supabase
         .from('extras')
         .insert([extra])
         .select()
@@ -410,9 +532,23 @@ export function useData() {
     loading.value = true;
     error.value = null;
     try {
-      const sb = ensureSupabase();
+      if (!isSupabaseAvailable || !supabase) {
+        const allExtras = localStorageDB.getExtras();
+        const index = allExtras.findIndex(e => e.id === id);
+        if (index !== -1) {
+          allExtras[index] = {
+            ...allExtras[index],
+            ...updates,
+            updated_at: new Date().toISOString()
+          };
+          localStorageDB.setExtras(allExtras);
+          extras.value = allExtras;
+          return allExtras[index];
+        }
+        throw new Error('Extra not found');
+      }
 
-      const { data, error: err } = await sb
+      const { data, error: err } = await supabase
         .from('extras')
         .update({ ...updates, updated_at: new Date().toISOString() })
         .eq('id', id)
@@ -440,9 +576,15 @@ export function useData() {
     loading.value = true;
     error.value = null;
     try {
-      const sb = ensureSupabase();
+      if (!isSupabaseAvailable || !supabase) {
+        const allExtras = localStorageDB.getExtras();
+        const filtered = allExtras.filter(e => e.id !== id);
+        localStorageDB.setExtras(filtered);
+        extras.value = filtered;
+        return;
+      }
 
-      const { error: err } = await sb
+      const { error: err } = await supabase
         .from('extras')
         .delete()
         .eq('id', id);
@@ -474,6 +616,7 @@ export function useData() {
     extras: computed(() => extras.value),
     loading: computed(() => loading.value),
     error: computed(() => error.value),
+    usingLocalStorage: computed(() => usingLocalStorage.value),
     loadCategories,
     loadPlans,
     loadCopyTemplates,
