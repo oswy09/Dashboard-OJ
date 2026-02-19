@@ -1,5 +1,6 @@
 import { ref, computed } from 'vue';
-import { supabase, type Category, type Plan, type CopyTemplate, type Extra } from '../lib/supabase';
+import { supabase, isSupabaseAvailable, type Category, type Plan, type CopyTemplate, type Extra } from '../lib/supabase';
+import { mockCategories, mockPlans, mockCopyTemplates, mockExtras } from '../data/mockData';
 
 const categories = ref<Category[]>([]);
 const plans = ref<Plan[]>([]);
@@ -8,11 +9,24 @@ const extras = ref<Extra[]>([]);
 const loading = ref(false);
 const error = ref<string | null>(null);
 
+const ensureSupabase = () => {
+  if (!isSupabaseAvailable || !supabase) {
+    throw new Error('Supabase no está disponible en modo mock');
+  }
+  return supabase;
+};
+
 export function useData() {
   const loadCategories = async () => {
     loading.value = true;
     error.value = null;
     try {
+      if (!isSupabaseAvailable || !supabase) {
+        console.log('Usando datos mock para categorías');
+        categories.value = mockCategories;
+        return;
+      }
+
       const { data, error: err } = await supabase
         .from('categories')
         .select('*')
@@ -23,6 +37,8 @@ export function useData() {
     } catch (e) {
       error.value = e instanceof Error ? e.message : 'Error loading categories';
       console.error('Error loading categories:', e);
+      console.log('Usando datos mock como fallback');
+      categories.value = mockCategories;
     } finally {
       loading.value = false;
     }
@@ -32,6 +48,12 @@ export function useData() {
     loading.value = true;
     error.value = null;
     try {
+      if (!isSupabaseAvailable || !supabase) {
+        console.log('Usando datos mock para planes');
+        plans.value = mockPlans;
+        return;
+      }
+
       const { data, error: err } = await supabase
         .from('plans')
         .select('*')
@@ -42,6 +64,8 @@ export function useData() {
     } catch (e) {
       error.value = e instanceof Error ? e.message : 'Error loading plans';
       console.error('Error loading plans:', e);
+      console.log('Usando datos mock como fallback');
+      plans.value = mockPlans;
     } finally {
       loading.value = false;
     }
@@ -51,6 +75,12 @@ export function useData() {
     loading.value = true;
     error.value = null;
     try {
+      if (!isSupabaseAvailable || !supabase) {
+        console.log('Usando datos mock para templates');
+        copyTemplates.value = mockCopyTemplates;
+        return;
+      }
+
       const { data, error: err } = await supabase
         .from('copy_templates')
         .select('*')
@@ -61,6 +91,8 @@ export function useData() {
     } catch (e) {
       error.value = e instanceof Error ? e.message : 'Error loading copy templates';
       console.error('Error loading copy templates:', e);
+      console.log('Usando datos mock como fallback');
+      copyTemplates.value = mockCopyTemplates;
     } finally {
       loading.value = false;
     }
@@ -70,6 +102,12 @@ export function useData() {
     loading.value = true;
     error.value = null;
     try {
+      if (!isSupabaseAvailable || !supabase) {
+        console.log('Usando datos mock para extras');
+        extras.value = mockExtras;
+        return;
+      }
+
       const { data, error: err } = await supabase
         .from('extras')
         .select('*')
@@ -80,6 +118,8 @@ export function useData() {
     } catch (e) {
       error.value = e instanceof Error ? e.message : 'Error loading extras';
       console.error('Error loading extras:', e);
+      console.log('Usando datos mock como fallback');
+      extras.value = mockExtras;
     } finally {
       loading.value = false;
     }
@@ -110,7 +150,9 @@ export function useData() {
     loading.value = true;
     error.value = null;
     try {
-      const { data, error: err } = await supabase
+      const sb = ensureSupabase();
+
+      const { data, error: err } = await sb
         .from('categories')
         .insert([category])
         .select()
@@ -134,7 +176,9 @@ export function useData() {
     loading.value = true;
     error.value = null;
     try {
-      const { data, error: err } = await supabase
+      const sb = ensureSupabase();
+
+      const { data, error: err } = await sb
         .from('categories')
         .update({ ...updates, updated_at: new Date().toISOString() })
         .eq('id', id)
@@ -162,7 +206,9 @@ export function useData() {
     loading.value = true;
     error.value = null;
     try {
-      const { error: err } = await supabase
+      const sb = ensureSupabase();
+
+      const { error: err } = await sb
         .from('categories')
         .delete()
         .eq('id', id);
@@ -182,7 +228,9 @@ export function useData() {
     loading.value = true;
     error.value = null;
     try {
-      const { data, error: err } = await supabase
+      const sb = ensureSupabase();
+
+      const { data, error: err } = await sb
         .from('plans')
         .insert([plan])
         .select()
@@ -206,7 +254,9 @@ export function useData() {
     loading.value = true;
     error.value = null;
     try {
-      const { data, error: err } = await supabase
+      const sb = ensureSupabase();
+
+      const { data, error: err } = await sb
         .from('plans')
         .update({ ...updates, updated_at: new Date().toISOString() })
         .eq('id', id)
@@ -234,7 +284,9 @@ export function useData() {
     loading.value = true;
     error.value = null;
     try {
-      const { error: err } = await supabase
+      const sb = ensureSupabase();
+
+      const { error: err } = await sb
         .from('plans')
         .delete()
         .eq('id', id);
@@ -254,7 +306,9 @@ export function useData() {
     loading.value = true;
     error.value = null;
     try {
-      const { data, error: err } = await supabase
+      const sb = ensureSupabase();
+
+      const { data, error: err } = await sb
         .from('copy_templates')
         .insert([template])
         .select()
@@ -278,7 +332,9 @@ export function useData() {
     loading.value = true;
     error.value = null;
     try {
-      const { data, error: err } = await supabase
+      const sb = ensureSupabase();
+
+      const { data, error: err } = await sb
         .from('copy_templates')
         .update({ ...updates, updated_at: new Date().toISOString() })
         .eq('id', id)
@@ -306,7 +362,9 @@ export function useData() {
     loading.value = true;
     error.value = null;
     try {
-      const { error: err } = await supabase
+      const sb = ensureSupabase();
+
+      const { error: err } = await sb
         .from('copy_templates')
         .delete()
         .eq('id', id);
@@ -326,7 +384,9 @@ export function useData() {
     loading.value = true;
     error.value = null;
     try {
-      const { data, error: err } = await supabase
+      const sb = ensureSupabase();
+
+      const { data, error: err } = await sb
         .from('extras')
         .insert([extra])
         .select()
@@ -350,7 +410,9 @@ export function useData() {
     loading.value = true;
     error.value = null;
     try {
-      const { data, error: err } = await supabase
+      const sb = ensureSupabase();
+
+      const { data, error: err } = await sb
         .from('extras')
         .update({ ...updates, updated_at: new Date().toISOString() })
         .eq('id', id)
@@ -378,7 +440,9 @@ export function useData() {
     loading.value = true;
     error.value = null;
     try {
-      const { error: err } = await supabase
+      const sb = ensureSupabase();
+
+      const { error: err } = await sb
         .from('extras')
         .delete()
         .eq('id', id);

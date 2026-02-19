@@ -1,13 +1,25 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables');
+let supabase: SupabaseClient | null = null;
+let isSupabaseAvailable = false;
+
+try {
+  if (supabaseUrl && supabaseAnonKey) {
+    supabase = createClient(supabaseUrl, supabaseAnonKey);
+    isSupabaseAvailable = true;
+    console.log('Supabase conectado correctamente');
+  } else {
+    console.warn('Variables de entorno de Supabase no encontradas. Usando datos mock.');
+  }
+} catch (error) {
+  console.error('Error al conectar con Supabase:', error);
+  console.warn('Usando datos mock como fallback.');
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export { supabase, isSupabaseAvailable };
 
 export interface Category {
   id: string;
